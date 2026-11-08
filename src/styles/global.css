@@ -1,0 +1,250 @@
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --text: #1b1f27;
+  --muted: #5d6676;
+  --line: #d9dee6;
+  --line-strong: #b7bfcb;
+  --accent: #1f3a5f;
+  --accent-text: #ffffff;
+  --danger: #c0392b;
+  --now: #e5322d;
+
+  --kind-os: #dbe9ff;
+  --kind-os-b: #4a7bd0;
+  --kind-general: #e3f6e6;
+  --kind-general-b: #3f9a5a;
+  --kind-special: #ffe6c7;
+  --kind-special-b: #e08a1e;
+  --kind-social: #f6dcf3;
+  --kind-social-b: #b94fae;
+  --kind-business: #fff4bf;
+  --kind-business-b: #c9a300;
+  --kind-lunch: #ffe1d6;
+  --kind-lunch-b: #e2623f;
+  --kind-student: #d9f3f7;
+  --kind-student-b: #2a9bb0;
+  --kind-event: #e6e0ff;
+  --kind-event-b: #7259d6;
+  --kind-party: #ffd9e2;
+  --kind-party-b: #d6336c;
+  --kind-exhibition: #e8e8e8;
+  --kind-exhibition-b: #7a7a7a;
+
+  --topbar-h: 48px;
+  --tabs-h: 50px;
+  --time-col: 44px;
+  --header-h: 48px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Segoe UI', Roboto,
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-text-size-adjust: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.topbar {
+  flex: none;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.topbar-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+/* ---- day tabs ---- */
+.daytabs {
+  flex: none;
+  height: var(--tabs-h);
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.daytab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 0 2px;
+}
+
+.daytab-n {
+  font-size: 11px;
+}
+
+.daytab-d {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.daytab.is-today .daytab-d::after {
+  content: '●';
+  font-size: 8px;
+  color: var(--now);
+  margin-left: 3px;
+  vertical-align: middle;
+}
+
+.daytab.is-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- timetable grid ---- */
+.tt-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: var(--surface);
+}
+
+.tt-grid {
+  position: relative;
+  display: grid;
+  min-width: max-content;
+  /* horizontal lines every 15 min (27px), stronger every hour; vertical lines per column are drawn by the cells */
+  background-image:
+    repeating-linear-gradient(to bottom, var(--line-strong) 0 1px, transparent 1px 108px),
+    repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px 27px);
+  background-position:
+    0 var(--header-h),
+    0 var(--header-h);
+  background-size: 100% calc(100% - var(--header-h));
+  background-repeat: no-repeat;
+}
+
+.tt-corner {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  background: var(--surface);
+  border-right: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.tt-building {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 18px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-text);
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tt-building span {
+  position: sticky;
+  left: var(--time-col);
+  padding-left: 2px;
+}
+
+.tt-venue {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-top: 18px;
+  height: 30px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 4px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tt-venue-name {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tt-venue-room {
+  font-size: 10px;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.tt-time {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+  border-right: 1px solid var(--line-strong);
+  font-size: 11px;
+  color: var(--muted);
+  padding: 0 4px;
+  text-align: right;
+  line-height: 1;
+  padding-top: 3px;
+}
+
+.tt-time.is-hour {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tt-col {
+  border-right: 1px solid var(--line);
+  pointer-events: none;
+}
