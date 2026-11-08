@@ -153,6 +153,10 @@ export function SettingsMenu({ selected, visibleCount, onReplace, onClear, onClo
               </a>
               をご確認ください。
             </p>
+            <p className="hint">
+              利用状況の把握のため、訪問数を GoatCounter で匿名計測しています（Cookie や個人を特定する情報は使いません）。
+              マイスケジュールの内容は送信されません。
+            </p>
           </section>
         </div>
       </aside>
