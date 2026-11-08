@@ -131,7 +131,7 @@ export function MySchedule({ plans, print = false, onOpen, onRemove, onPrint }: 
       )}
       {print && (
         <p className="print-foot">
-          このアプリは個人が作成したもので、宇科連（宇宙科学技術連合講演会）公式のものではありません。講演の時刻は目安です。最新情報は公式サイトをご確認ください。
+          このアプリは個人が作成したもので、宇科連（宇宙科学技術連合講演会）公式のものではありません。講演の時刻は目安です。最新情報は公式サイトをご確認ください。（アプリ v{__APP_VERSION__}）
         </p>
       )}
     </div>

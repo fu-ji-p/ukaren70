@@ -41,6 +41,8 @@ export default function App() {
 
   const selection = useMemo(() => summarizeSelection(schedule.selected), [schedule.selected]);
   const plans = useMemo(() => buildDayPlans(DATES, schedule.selected, sessionById, venueById), [schedule.selected]);
+  // entries that resolve against the current program (stale ids stay stored but are not counted)
+  const visibleCount = useMemo(() => plans.reduce((n, p) => n + p.items.length, 0), [plans]);
 
   const toggleSession = useCallback(
     (id: string) => schedule.apply(toggleSessionChange(schedule.selected, id)),
@@ -55,7 +57,7 @@ export default function App() {
   const [pendingImport, setPendingImport] = useState<string[] | null>(null);
   useEffect(() => {
     const check = () => {
-      const ids = parseShareHash(window.location.hash)?.filter(isKnownSelection);
+      const ids = parseShareHash(window.location.hash);
       if (!ids) return;
       history.replaceState(null, '', window.location.pathname + window.location.search);
       if (ids.length > 0) setPendingImport(ids);
@@ -92,7 +94,7 @@ export default function App() {
             onClick={() => setView('schedule')}
           >
             マイスケジュール
-            {schedule.selected.length > 0 && <span className="count">{schedule.selected.length}</span>}
+            {visibleCount > 0 && <span className="count">{visibleCount}</span>}
           </button>
         </nav>
         <button type="button" className="iconbtn" aria-label="設定" onClick={() => setSettingsOpen(true)}>
@@ -103,7 +105,7 @@ export default function App() {
         <div className="import-banner" role="alert">
           <span>
             リンクに{pendingImport.length}件の選択が含まれています。読み込みますか？
-            {schedule.selected.length > 0 && `（この端末の${schedule.selected.length}件は置き換えられます）`}
+            {visibleCount > 0 && `（この端末の${visibleCount}件は置き換えられます）`}
           </span>
           <span className="row">
             <button type="button" className="btn btn-sm btn-primary" onClick={acceptImport}>
@@ -148,6 +150,7 @@ export default function App() {
       {settingsOpen && (
         <SettingsMenu
           selected={schedule.selected}
+          visibleCount={visibleCount}
           onReplace={schedule.replace}
           onClear={schedule.clear}
           onClose={() => setSettingsOpen(false)}

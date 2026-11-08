@@ -4,12 +4,14 @@ import { parseScheduleJson, serializeSchedule } from '../lib/storage';
 
 interface Props {
   selected: string[];
+  /** entries that exist in the current program */
+  visibleCount: number;
   onReplace: (ids: string[]) => void;
   onClear: () => void;
   onClose: () => void;
 }
 
-export function SettingsMenu({ selected, onReplace, onClear, onClose }: Props) {
+export function SettingsMenu({ selected, visibleCount, onReplace, onClear, onClose }: Props) {
   const [text, setText] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -94,7 +96,7 @@ export function SettingsMenu({ selected, onReplace, onClear, onClose }: Props) {
           </p>
           <section>
             <h3>別の端末へ送る</h3>
-            <p className="hint">選択中 {selected.length}件</p>
+            <p className="hint">選択中 {visibleCount}件</p>
             <div className="row">
               <button type="button" className="btn" onClick={shareLink} disabled={selected.length === 0}>
                 🔗 リンクをコピー / 共有
@@ -141,7 +143,7 @@ export function SettingsMenu({ selected, onReplace, onClear, onClose }: Props) {
           </section>
           {msg && <p className="settings-msg">{msg}</p>}
           <section className="about">
-            <h3>このアプリについて</h3>
+            <h3>このアプリについて（v{__APP_VERSION__}）</h3>
             <p className="hint">
               このアプリは個人が作成した非公式ツールで、宇科連（宇宙科学技術連合講演会）および主催者とは関係ありません。
               プログラムは公開情報をもとに作成しており、変更が反映されていない場合があります。講演ごとの時刻はセッション時間を

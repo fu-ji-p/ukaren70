@@ -46,6 +46,26 @@ npm run build    # 型チェック + dist/ 生成
 - `main` への push で GitHub Actions がテスト→ビルド→GitHub Pages にデプロイします。
 - 仕様の詳細は [docs/SPEC.md](docs/SPEC.md)。
 
+## リリース手順（バージョン管理）
+
+細かな更新でも次の手順でバージョンを付けます。利用者の保存データはブラウザ側にあるため、
+アプリを更新しても消えません（詳細は [docs/SPEC.md 第5章](docs/SPEC.md#5-保存形式と選択の単位)）。
+
+1. `package.json` の `version` を上げる（機能追加は minor、修正は patch、保存形式の変更は major）。
+2. `CHANGELOG.md` に変更点を書く。
+3. `npm test && npm run build` を通す。
+4. コミットし、同じ番号のタグを付けて push する。
+
+```bash
+git add -A && git commit -m "Release v1.2.0: ..."
+```
+
+```bash
+git tag -a v1.2.0 -m "v1.2.0" && git push origin main --tags
+```
+
+アプリ内のバージョンは ⚙ 設定の「このアプリについて」と印刷物の末尾に表示されます。
+
 ## データの更新
 
 プログラムは `data/program.json` にあり、ビルド時に取り込まれます。
