@@ -52,6 +52,13 @@ export function Timetable({ venues, sessions, selectedSet, matchSet, nowMinutes,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showNow, venues]);
 
+  // When a search is active, bring the first matching card of this day into view.
+  useEffect(() => {
+    if (!matchSet || !scrollRef.current) return;
+    const first = scrollRef.current.querySelector<HTMLElement>('.card.is-matched');
+    first?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [matchSet, venues]);
+
   return (
     <div className="tt-wrap">
       {offGrid.length > 0 && (

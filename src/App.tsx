@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { DATES, gridVenues, program, sessionById, sessionsByDate, venueById } from './data';
 import { DayTabs } from './components/DayTabs';
 import { MySchedule } from './components/MySchedule';
+import { SearchBar } from './components/SearchBar';
 import { SessionDetail } from './components/SessionDetail';
 import { SettingsMenu } from './components/SettingsMenu';
 import { Timetable } from './components/Timetable';
@@ -9,6 +10,7 @@ import { useNow } from './hooks/useNow';
 import { useSchedule } from './hooks/useSchedule';
 import { initialDate } from './lib/layout';
 import { buildDayPlans } from './lib/schedule';
+import { matchSessions } from './lib/search';
 
 type View = 'timetable' | 'schedule';
 
@@ -23,6 +25,16 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const close = useCallback(() => setOpenId(null), []);
   const open = openId ? sessionById.get(openId) : undefined;
+
+  const [query, setQuery] = useState('');
+  const matchSet = useMemo(() => matchSessions(program.sessions, query), [query]);
+  const hitCounts = useMemo(
+    () =>
+      matchSet
+        ? DATES.map((d) => ({ date: d, count: (sessionsByDate.get(d) ?? []).filter((s) => matchSet.has(s.id)).length }))
+        : null,
+    [matchSet],
+  );
 
   const plans = useMemo(() => buildDayPlans(DATES, schedule.selected, sessionById, venueById), [schedule.selected]);
 
@@ -58,12 +70,13 @@ export default function App() {
       {view === 'timetable' ? (
         <>
           <DayTabs dates={DATES} value={date} today={now.date} onChange={setDate} />
+          <SearchBar value={query} onChange={setQuery} counts={hitCounts} onJump={setDate} />
           <main className="main">
             <Timetable
               venues={gridVenues}
               sessions={sessionsByDate.get(date) ?? []}
               selectedSet={schedule.selectedSet}
-              matchSet={null}
+              matchSet={matchSet}
               nowMinutes={now.date === date ? now.minutes : null}
               onOpen={setOpenId}
             />
@@ -78,6 +91,7 @@ export default function App() {
         <SessionDetail
           session={open}
           selected={schedule.selectedSet.has(open.id)}
+          query={query}
           onToggle={schedule.toggle}
           onClose={close}
         />
