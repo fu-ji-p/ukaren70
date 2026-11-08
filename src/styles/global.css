@@ -761,7 +761,21 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
   padding: 4px 0 8px;
+}
+
+.sched-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sched-hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--muted);
 }
 
 .sched-count {

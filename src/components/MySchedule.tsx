@@ -2,6 +2,25 @@ import { buildingClass } from '../lib/layout';
 import type { DayPlan } from '../lib/schedule';
 import { KIND_LABEL, venueById } from '../data';
 import { formatDateJa } from '../lib/time';
+import { buildIcs } from '../lib/ics';
+
+export const ICS_FILENAME = 'ukaren70-myschedule.ics';
+
+/** Build the .ics text for every selected item and hand it to the browser as a download. */
+function downloadIcs(plans: DayPlan[]) {
+  const items = plans.flatMap((p) => p.items);
+  const appUrl = typeof location !== 'undefined' ? location.origin + import.meta.env.BASE_URL : undefined;
+  const text = buildIcs(items, venueById, { calendarName: '宇科連70 マイスケジュール', appUrl });
+  const blob = new Blob([text], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = ICS_FILENAME;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 interface Props {
   plans: DayPlan[];
@@ -25,10 +44,26 @@ export function MySchedule({ plans, print = false, onOpen, onRemove, onPrint }: 
       {!print && (
         <div className="sched-toolbar">
           <span className="sched-count">{total}件を選択中</span>
-          <button type="button" className="btn" onClick={onPrint} disabled={total === 0}>
-            🖨 印刷
-          </button>
+          <span className="sched-actions">
+            <button
+              type="button"
+              className="btn"
+              onClick={() => downloadIcs(plans)}
+              disabled={total === 0}
+              title="iCalendar (.ics) ファイルを保存します。Google カレンダー・iPhone のカレンダー・Outlook で開くと予定として追加できます。"
+            >
+              📅 カレンダーに書き出し
+            </button>
+            <button type="button" className="btn" onClick={onPrint} disabled={total === 0}>
+              🖨 印刷
+            </button>
+          </span>
         </div>
+      )}
+      {!print && total > 0 && (
+        <p className="sched-hint">
+          「カレンダーに書き出し」は .ics ファイルを保存します。Google カレンダー・iPhone のカレンダー・Outlook で開くと、選んだ予定をまとめて追加できます。
+        </p>
       )}
       {!print && (
         <p className="notice">
