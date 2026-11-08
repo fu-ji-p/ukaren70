@@ -9,6 +9,7 @@ import {
   SUB_PX,
   TIME_COL_PX,
   VENUE_COL_MIN_PX,
+  buildingClass,
   groupByBuilding,
   minutesToOffset,
   timeSlots,
@@ -32,6 +33,9 @@ export function Timetable({ venues, sessions, selection, matchSet, nowMinutes, o
   const groups = groupByBuilding(venues);
   const slots = timeSlots();
   const colIndex = new Map(venues.map((v, i) => [v.id, i + 2]));
+  // First venue of every building group after the first one gets a thick divider on its left.
+  const groupStart = new Set(groups.slice(1).map((g) => g.venues[0].id));
+  const venueClass = (v: Venue) => ' ' + buildingClass(v.building) + (groupStart.has(v.id) ? ' is-group-start' : '');
   const gridSessions = sessions.filter((s) => colIndex.has(s.venue));
   const offGrid = sessions.filter((s) => !colIndex.has(s.venue));
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -93,7 +97,7 @@ export function Timetable({ venues, sessions, selection, matchSet, nowMinutes, o
             return (
               <div
                 key={gi}
-                className="tt-building"
+                className={'tt-building ' + buildingClass(g.building) + (gi > 0 ? ' is-group-start' : '')}
                 style={{ gridRow: 1, gridColumn: `${first} / span ${g.venues.length}` }}
               >
                 <span>{g.building}</span>
@@ -101,7 +105,12 @@ export function Timetable({ venues, sessions, selection, matchSet, nowMinutes, o
             );
           })}
           {venues.map((v, i) => (
-            <div key={v.id} className="tt-venue" style={{ gridRow: 1, gridColumn: i + 2 }} title={v.room}>
+            <div
+              key={v.id}
+              className={'tt-venue' + venueClass(v)}
+              style={{ gridRow: 1, gridColumn: i + 2 }}
+              title={`${v.room}（${v.building}）`}
+            >
               <span className="tt-venue-name">{v.name}</span>
               <span className="tt-venue-room">{v.room}</span>
             </div>
@@ -120,7 +129,7 @@ export function Timetable({ venues, sessions, selection, matchSet, nowMinutes, o
           </div>
           {/* column separators */}
           {venues.map((v, i) => (
-            <div key={v.id} className="tt-col" style={{ gridRow: 2, gridColumn: i + 2 }} />
+            <div key={v.id} className={'tt-col' + venueClass(v)} style={{ gridRow: 2, gridColumn: i + 2 }} />
           ))}
           {gridSessions.map((s) => (
             <SessionCard

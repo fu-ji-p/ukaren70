@@ -1,3 +1,4 @@
+import { buildingClass } from '../lib/layout';
 import type { DayPlan } from '../lib/schedule';
 import { KIND_LABEL, venueById } from '../data';
 import { formatDateJa } from '../lib/time';
@@ -92,7 +93,7 @@ export function MySchedule({ plans, print = false, onOpen, onRemove, onPrint }: 
                           )}
                           <div className="sched-venue">
                             <strong>{v?.name ?? s.venue}</strong> {v?.room}
-                            <span className="sched-building">{v?.building}</span>
+                            <span className={'bld-tag ' + buildingClass(v?.building)}>{v?.building}</span>
                           </div>
                           {!it.talk && s.chair && <div className="sched-chair">司会: {s.chair}</div>}
                           {print && !it.talk && s.talks.length > 0 && (

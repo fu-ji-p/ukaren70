@@ -31,6 +31,17 @@
   --kind-exhibition: #e8e8e8;
   --kind-exhibition-b: #7a7a7a;
 
+  /* building colours: ライトキューブ宇都宮 (navy) vs TKPガーデンシティ宇都宮 (green) */
+  --bld-lc: #1f3a5f;
+  --bld-lc-bg: #edf2fa;
+  --bld-lc-tint: rgba(31, 58, 95, 0.045);
+  --bld-tkp: #0f7a5a;
+  --bld-tkp-bg: #e4f4ec;
+  --bld-tkp-tint: rgba(15, 122, 90, 0.08);
+  --bld-other: #6b6b6b;
+  --bld-other-bg: #efefef;
+  --bld-other-tint: rgba(0, 0, 0, 0.04);
+
   --topbar-h: 48px;
   --tabs-h: 50px;
   --time-col: 44px;
@@ -56,6 +67,37 @@ body {
 button {
   font: inherit;
   color: inherit;
+}
+
+.bld-lc {
+  --bld: var(--bld-lc);
+  --bld-bg: var(--bld-lc-bg);
+  --bld-tint: var(--bld-lc-tint);
+}
+.bld-tkp {
+  --bld: var(--bld-tkp);
+  --bld-bg: var(--bld-tkp-bg);
+  --bld-tint: var(--bld-tkp-tint);
+}
+.bld-other {
+  --bld: var(--bld-other);
+  --bld-bg: var(--bld-other-bg);
+  --bld-tint: var(--bld-other-tint);
+}
+
+/* building name shown as a coloured pill (detail sheet, My Schedule) */
+.bld-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--bld, var(--muted));
+  background: var(--bld-bg, transparent);
+  border: 1px solid var(--bld, var(--line));
+  vertical-align: 1px;
 }
 
 .app {
@@ -182,12 +224,16 @@ button {
   font-size: 11px;
   font-weight: 600;
   color: var(--accent-text);
-  background: var(--accent);
+  background: var(--bld, var(--accent));
   display: flex;
   align-items: center;
   padding: 0 6px;
   overflow: hidden;
   white-space: nowrap;
+}
+
+.tt-building.is-group-start {
+  border-left: 3px solid #fff;
 }
 
 .tt-building span {
@@ -196,14 +242,25 @@ button {
   padding-left: 2px;
 }
 
+.tt-building span::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  margin-right: 5px;
+  vertical-align: 0;
+}
+
 .tt-venue {
   position: sticky;
   top: 18px; /* below the sticky building row */
   z-index: 2;
   margin-top: 18px;
   height: 30px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--line-strong);
+  background: var(--bld-bg, var(--surface));
+  border-bottom: 2px solid var(--bld, var(--line-strong));
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
@@ -211,6 +268,12 @@ button {
   padding: 0 4px;
   overflow: hidden;
   white-space: nowrap;
+}
+
+/* thick divider where the building changes (header and body) */
+.tt-venue.is-group-start,
+.tt-col.is-group-start {
+  border-left: 3px solid var(--bld, var(--line-strong));
 }
 
 .tt-venue-name {
@@ -264,6 +327,7 @@ button {
 .tt-col {
   border-right: 1px solid var(--line);
   pointer-events: none;
+  background: var(--bld-tint, transparent);
 }
 
 .tt-now {
@@ -540,12 +604,6 @@ button {
   margin: 0;
 }
 
-.sheet-building {
-  display: block;
-  font-size: 12px;
-  color: var(--muted);
-}
-
 .talks {
   list-style: none;
   margin: 0;
@@ -820,11 +878,6 @@ button {
   font-size: 12px;
 }
 
-.sched-building {
-  color: var(--muted);
-  margin-left: 6px;
-}
-
 .sched-chair {
   font-size: 12px;
   color: var(--muted);
@@ -1001,9 +1054,15 @@ button {
     color: #000;
   }
 
-  .sched-building,
   .kind-mini {
     color: #444;
+  }
+
+  .bld-tag {
+    color: #000;
+    background: none;
+    border-color: #000;
+    font-size: 8pt;
   }
 
   .badge-warn {

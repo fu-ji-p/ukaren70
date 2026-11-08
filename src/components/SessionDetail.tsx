@@ -1,3 +1,4 @@
+import { buildingClass } from '../lib/layout';
 import { useEffect } from 'react';
 import type { Session } from '../types';
 import { KIND_LABEL, venueById } from '../data';
@@ -57,7 +58,7 @@ export function SessionDetail({ session, selection, query, onToggleSession, onTo
               {venue ? (
                 <>
                   <strong>{venue.name}</strong> {venue.room}
-                  <span className="sheet-building">{venue.building}</span>
+                  <span className={'bld-tag ' + buildingClass(venue.building)}>{venue.building}</span>
                 </>
               ) : (
                 session.venue

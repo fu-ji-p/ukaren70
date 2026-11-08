@@ -47,6 +47,12 @@ export function gridRow(min: number): number {
 
 const BUILDING_ORDER = ['ライトキューブ宇都宮', 'TKPガーデンシティ宇都宮'];
 
+/** CSS class that carries a building's colour (`--bld` / `--bld-bg`): ライトキューブ, TKP, or other. */
+export function buildingClass(building: string | undefined): 'bld-lc' | 'bld-tkp' | 'bld-other' {
+  const i = building ? BUILDING_ORDER.indexOf(building) : -1;
+  return i === 0 ? 'bld-lc' : i === 1 ? 'bld-tkp' : 'bld-other';
+}
+
 /**
  * Venue columns in display order: A..N (Light Cube), O..S (TKP), then the foyers.
  * Non-grid venues (exhibition, off-site party) are excluded.
