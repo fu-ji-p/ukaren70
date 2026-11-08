@@ -27,7 +27,8 @@ export default function App() {
   const plans = useMemo(() => buildDayPlans(DATES, schedule.selected, sessionById, venueById), [schedule.selected]);
 
   return (
-    <div className="app">
+    <>
+    <div className="app screen-only">
       <header className="topbar">
         <h1 className="topbar-title">
           <span className="title-long">{program.conference.name}</span>
@@ -90,5 +91,16 @@ export default function App() {
         />
       )}
     </div>
+    {/* Print layout (A4 portrait, one page per day). Hidden on screen; Cmd/Ctrl+P works from any view. */}
+    <div className="print-root print-only">
+      <header className="print-head">
+        <h1>{program.conference.name} マイスケジュール</h1>
+        <p>
+          {window.location.href.split('?')[0]} ・ 印刷: {new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}
+        </p>
+      </header>
+      <MySchedule plans={plans} print />
+    </div>
+    </>
   );
 }
