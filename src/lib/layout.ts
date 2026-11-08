@@ -88,8 +88,15 @@ export function overlaps(a: Pick<Session, 'start' | 'end'>, b: Pick<Session, 'st
   return toMinutes(a.start) < toMinutes(b.end) && toMinutes(b.start) < toMinutes(a.end);
 }
 
-/** IDs of sessions (same day assumed) that overlap with at least one other session in the list. */
-export function conflictingIds(sessions: Session[]): Set<string> {
+export interface TimeItem {
+  id: string;
+  start: string;
+  end: string;
+  venue: string;
+}
+
+/** IDs of items (same day assumed) that overlap with at least one other item in the list. */
+export function conflictingIds(sessions: TimeItem[]): Set<string> {
   const out = new Set<string>();
   for (let i = 0; i < sessions.length; i++) {
     for (let j = i + 1; j < sessions.length; j++) {
@@ -121,7 +128,7 @@ export interface BuildingMove {
  * Building changes between consecutive selected sessions of one day
  * (e.g. Light Cube -> TKP). Input must be sorted by start time.
  */
-export function buildingMoves(sessions: Session[], venueById: Map<string, Venue>): BuildingMove[] {
+export function buildingMoves(sessions: TimeItem[], venueById: Map<string, Venue>): BuildingMove[] {
   const moves: BuildingMove[] = [];
   for (let i = 1; i < sessions.length; i++) {
     const prev = sessions[i - 1];

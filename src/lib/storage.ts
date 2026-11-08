@@ -12,7 +12,8 @@ export interface StorageLike {
   removeItem(key: string): void;
 }
 
-const ID_RE = /^\d{2}[A-Z0-9]{1,6}\d{0,4}$/;
+// session id, optionally followed by '/' + talk code (see lib/selection.ts)
+const ID_RE = /^\d{2}[A-Z0-9]{1,6}\d{0,4}(\/[A-Za-z0-9]{1,8})?$/;
 
 /** Validate arbitrary JSON (from localStorage or an imported file). Returns null when unusable. */
 export function parseScheduleJson(text: string | null | undefined): ScheduleFile | null {

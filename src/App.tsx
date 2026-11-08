@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DATES, gridVenues, program, sessionById, sessionsByDate, venueById } from './data';
 import { DayTabs } from './components/DayTabs';
 import { MySchedule } from './components/MySchedule';
@@ -11,16 +11,19 @@ import { useSchedule } from './hooks/useSchedule';
 import { initialDate } from './lib/layout';
 import { buildDayPlans } from './lib/schedule';
 import { matchSessions } from './lib/search';
+import { resolveItem, summarizeSelection, toggleSessionChange, toggleTalkChange } from './lib/selection';
+import { parseShareHash } from './lib/share';
+import type { Session } from './types';
 
 type View = 'timetable' | 'schedule';
 
-const isKnownSession = (id: string) => sessionById.has(id);
+const isKnownSelection = (id: string) => resolveItem(id, sessionById) !== null;
 
 export default function App() {
   const now = useNow();
   const [date, setDate] = useState(() => initialDate(DATES, now.date));
   const [view, setView] = useState<View>('timetable');
-  const schedule = useSchedule(isKnownSession);
+  const schedule = useSchedule(isKnownSelection);
   const [openId, setOpenId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const close = useCallback(() => setOpenId(null), []);
@@ -36,7 +39,36 @@ export default function App() {
     [matchSet],
   );
 
+  const selection = useMemo(() => summarizeSelection(schedule.selected), [schedule.selected]);
   const plans = useMemo(() => buildDayPlans(DATES, schedule.selected, sessionById, venueById), [schedule.selected]);
+
+  const toggleSession = useCallback(
+    (id: string) => schedule.apply(toggleSessionChange(schedule.selected, id)),
+    [schedule.apply, schedule.selected],
+  );
+  const toggleTalk = useCallback(
+    (s: Session, i: number) => schedule.apply(toggleTalkChange(schedule.selected, s, i)),
+    [schedule.apply, schedule.selected],
+  );
+
+  // A share link (#s=...) opened on another device: offer to import it (banner), then drop the hash.
+  const [pendingImport, setPendingImport] = useState<string[] | null>(null);
+  useEffect(() => {
+    const check = () => {
+      const ids = parseShareHash(window.location.hash)?.filter(isKnownSelection);
+      if (!ids) return;
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      if (ids.length > 0) setPendingImport(ids);
+    };
+    check();
+    window.addEventListener('hashchange', check);
+    return () => window.removeEventListener('hashchange', check);
+  }, []);
+  const acceptImport = () => {
+    if (pendingImport) schedule.replace(pendingImport);
+    setPendingImport(null);
+    setView('schedule');
+  };
 
   return (
     <>
@@ -67,6 +99,22 @@ export default function App() {
           ⚙
         </button>
       </header>
+      {pendingImport && (
+        <div className="import-banner" role="alert">
+          <span>
+            リンクに{pendingImport.length}件の選択が含まれています。読み込みますか？
+            {schedule.selected.length > 0 && `（この端末の${schedule.selected.length}件は置き換えられます）`}
+          </span>
+          <span className="row">
+            <button type="button" className="btn btn-sm btn-primary" onClick={acceptImport}>
+              読み込む
+            </button>
+            <button type="button" className="btn btn-sm" onClick={() => setPendingImport(null)}>
+              無視
+            </button>
+          </span>
+        </div>
+      )}
       {view === 'timetable' ? (
         <>
           <DayTabs dates={DATES} value={date} today={now.date} onChange={setDate} />
@@ -75,7 +123,7 @@ export default function App() {
             <Timetable
               venues={gridVenues}
               sessions={sessionsByDate.get(date) ?? []}
-              selectedSet={schedule.selectedSet}
+              selection={selection}
               matchSet={matchSet}
               nowMinutes={now.date === date ? now.minutes : null}
               onOpen={setOpenId}
@@ -90,9 +138,10 @@ export default function App() {
       {open && (
         <SessionDetail
           session={open}
-          selected={schedule.selectedSet.has(open.id)}
+          selection={selection.get(open.id)}
           query={query}
-          onToggle={schedule.toggle}
+          onToggleSession={toggleSession}
+          onToggleTalk={toggleTalk}
           onClose={close}
         />
       )}
@@ -110,7 +159,7 @@ export default function App() {
       <header className="print-head">
         <h1>{program.conference.name} マイスケジュール</h1>
         <p>
-          {window.location.href.split('?')[0]} ・ 印刷: {new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}
+          {window.location.href.split(/[?#]/)[0]} ・ 印刷: {new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}
         </p>
       </header>
       <MySchedule plans={plans} print />

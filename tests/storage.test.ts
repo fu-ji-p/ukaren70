@@ -42,8 +42,10 @@ describe('loading', () => {
   });
 
   it('keeps only string IDs that look like session IDs', () => {
-    const st = memoryStorage({ [STORAGE_KEY]: JSON.stringify({ selected: ['10A0900', 42, null, 'x'.repeat(50), '10PARTY1830'] }) });
-    expect(loadSchedule(st)).toEqual(['10A0900', '10PARTY1830']);
+    const st = memoryStorage({
+      [STORAGE_KEY]: JSON.stringify({ selected: ['10A0900', 42, null, 'x'.repeat(50), '10PARTY1830', '10A0900/2A05', '10A0900/i3', '10A0900/bad/x'] }),
+    });
+    expect(loadSchedule(st)).toEqual(['10A0900', '10PARTY1830', '10A0900/2A05', '10A0900/i3']);
   });
 
   it('survives a storage that throws', () => {

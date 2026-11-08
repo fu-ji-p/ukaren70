@@ -15,11 +15,12 @@ import {
 } from '../lib/layout';
 import { fromMinutes } from '../lib/time';
 import { SessionCard } from './SessionCard';
+import type { SessionSelection } from '../lib/selection';
 
 interface Props {
   venues: Venue[];
   sessions: Session[];
-  selectedSet: Set<string>;
+  selection: Map<string, SessionSelection>;
   /** null = no search active */
   matchSet: Set<string> | null;
   /** minutes since midnight in JST when the displayed day is today, else null */
@@ -27,7 +28,7 @@ interface Props {
   onOpen: (id: string) => void;
 }
 
-export function Timetable({ venues, sessions, selectedSet, matchSet, nowMinutes, onOpen }: Props) {
+export function Timetable({ venues, sessions, selection, matchSet, nowMinutes, onOpen }: Props) {
   const groups = groupByBuilding(venues);
   const slots = timeSlots();
   const colIndex = new Map(venues.map((v, i) => [v.id, i + 2]));
@@ -70,7 +71,7 @@ export function Timetable({ venues, sessions, selectedSet, matchSet, nowMinutes,
               className={
                 'chip kind-' +
                 s.kind +
-                (selectedSet.has(s.id) ? ' is-selected' : '') +
+                (selection.get(s.id)?.whole ? ' is-selected' : '') +
                 (matchSet && !matchSet.has(s.id) ? ' is-dimmed' : '')
               }
               onClick={() => onOpen(s.id)}
@@ -79,7 +80,7 @@ export function Timetable({ venues, sessions, selectedSet, matchSet, nowMinutes,
                 {s.start}–{s.end}
               </span>
               {s.title}
-              {selectedSet.has(s.id) && ' ✓'}
+              {selection.get(s.id)?.whole && ' ✓'}
             </button>
           ))}
         </div>
@@ -126,7 +127,7 @@ export function Timetable({ venues, sessions, selectedSet, matchSet, nowMinutes,
               key={s.id}
               session={s}
               column={colIndex.get(s.venue)!}
-              selected={selectedSet.has(s.id)}
+              selection={selection.get(s.id)}
               dimmed={matchSet !== null && !matchSet.has(s.id)}
               matched={matchSet !== null && matchSet.has(s.id)}
               onOpen={onOpen}

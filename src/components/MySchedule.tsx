@@ -6,7 +6,7 @@ interface Props {
   plans: DayPlan[];
   /** compact print layout: no buttons, talks listed */
   print?: boolean;
-  onOpen?: (id: string) => void;
+  onOpen?: (sessionId: string) => void;
   onRemove?: (id: string) => void;
   onPrint?: () => void;
 }
@@ -18,7 +18,7 @@ function formatGap(min: number): string {
 }
 
 export function MySchedule({ plans, print = false, onOpen, onRemove, onPrint }: Props) {
-  const total = plans.reduce((n, p) => n + p.sessions.length, 0);
+  const total = plans.reduce((n, p) => n + p.items.length, 0);
   return (
     <div className={'sched' + (print ? ' sched-print' : '')}>
       {!print && (
@@ -29,27 +29,35 @@ export function MySchedule({ plans, print = false, onOpen, onRemove, onPrint }: 
           </button>
         </div>
       )}
+      {!print && (
+        <p className="notice">
+          選択内容はこのブラウザ内にだけ保存されます。当日使う端末（スマホ）で追加するのが確実です。
+          パソコンで作った場合は ⚙ 設定の「リンクをコピー」でスマホへ送れます。
+        </p>
+      )}
       {!print && total === 0 && (
         <p className="sched-empty">
           まだ何も選んでいません。タイムテーブルでセッションをタップして「マイスケジュールに追加」を押してください。
+          講演1件だけを追加することもできます。
         </p>
       )}
       {plans.map((p, di) =>
-        p.sessions.length === 0 && print ? null : (
+        p.items.length === 0 && print ? null : (
           <section key={p.date} className="sched-day">
             <h2 className="sched-date">
               {di + 1}日目 {formatDateJa(p.date)}
               {p.conflicts.size > 0 && <span className="badge badge-warn">重複あり</span>}
             </h2>
-            {p.sessions.length === 0 ? (
+            {p.items.length === 0 ? (
               <p className="sched-none">選択なし</p>
             ) : (
               <ol className="sched-list">
-                {p.sessions.map((s) => {
+                {p.items.map((it) => {
+                  const s = it.session;
                   const v = venueById.get(s.venue);
-                  const move = p.moveBefore.get(s.id);
+                  const move = p.moveBefore.get(it.id);
                   return (
-                    <li key={s.id} className="sched-item-wrap">
+                    <li key={it.id} className="sched-item-wrap">
                       {move && (
                         <div className="move-note">
                           🚶 建物移動: {move.fromBuilding} → {move.toBuilding}
@@ -57,28 +65,37 @@ export function MySchedule({ plans, print = false, onOpen, onRemove, onPrint }: 
                         </div>
                       )}
                       <article
-                        className={'sched-item kind-' + s.kind + (p.conflicts.has(s.id) ? ' is-conflict' : '')}
+                        className={'sched-item kind-' + s.kind + (p.conflicts.has(it.id) ? ' is-conflict' : '') + (it.talk ? ' is-talk' : '')}
                         onClick={onOpen ? () => onOpen(s.id) : undefined}
                         role={onOpen ? 'button' : undefined}
                         tabIndex={onOpen ? 0 : undefined}
                         onKeyDown={onOpen ? (e) => e.key === 'Enter' && onOpen(s.id) : undefined}
                       >
                         <div className="sched-time">
-                          <span>{s.start}</span>
-                          <span className="sched-time-end">{s.end}</span>
+                          <span>{it.start}</span>
+                          <span className="sched-time-end">{it.end}</span>
+                          {it.estimated && <span className="sched-est">目安</span>}
                         </div>
                         <div className="sched-main">
                           <div className="sched-badges">
-                            <span className="kind-mini">{KIND_LABEL[s.kind]}</span>
-                            {p.conflicts.has(s.id) && <span className="badge badge-warn">重複</span>}
+                            <span className="kind-mini">{it.talk ? `講演 ${it.talk.code ?? ''}` : KIND_LABEL[s.kind]}</span>
+                            {p.conflicts.has(it.id) && <span className="badge badge-warn">重複</span>}
                           </div>
-                          <h3 className="sched-title">{s.title}</h3>
+                          {it.talk ? (
+                            <>
+                              <h3 className="sched-title">{it.talk.title}</h3>
+                              <div className="sched-chair">{it.talk.authors}</div>
+                              <div className="sched-session">{s.title}</div>
+                            </>
+                          ) : (
+                            <h3 className="sched-title">{s.title}</h3>
+                          )}
                           <div className="sched-venue">
                             <strong>{v?.name ?? s.venue}</strong> {v?.room}
                             <span className="sched-building">{v?.building}</span>
                           </div>
-                          {s.chair && <div className="sched-chair">司会: {s.chair}</div>}
-                          {print && s.talks.length > 0 && (
+                          {!it.talk && s.chair && <div className="sched-chair">司会: {s.chair}</div>}
+                          {print && !it.talk && s.talks.length > 0 && (
                             <ul className="sched-talks">
                               {s.talks.map((t, i) => (
                                 <li key={i}>
@@ -97,7 +114,7 @@ export function MySchedule({ plans, print = false, onOpen, onRemove, onPrint }: 
                             aria-label="削除"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onRemove(s.id);
+                              onRemove(it.id);
                             }}
                           >
                             ×
@@ -111,6 +128,11 @@ export function MySchedule({ plans, print = false, onOpen, onRemove, onPrint }: 
             )}
           </section>
         ),
+      )}
+      {print && (
+        <p className="print-foot">
+          このアプリは個人が作成したもので、宇科連（宇宙科学技術連合講演会）公式のものではありません。講演の時刻は目安です。最新情報は公式サイトをご確認ください。
+        </p>
       )}
     </div>
   );

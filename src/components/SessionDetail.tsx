@@ -1,19 +1,24 @@
 import { useEffect } from 'react';
 import type { Session } from '../types';
 import { KIND_LABEL, venueById } from '../data';
+import { talkKey, talkTime, type SessionSelection } from '../lib/selection';
 import { formatDateJa } from '../lib/time';
 
 interface Props {
   session: Session;
-  selected: boolean;
+  selection: SessionSelection | undefined;
   /** lower-cased search query, used to highlight matching talks */
   query?: string;
-  onToggle: (id: string) => void;
+  onToggleSession: (id: string) => void;
+  onToggleTalk: (session: Session, index: number) => void;
   onClose: () => void;
 }
 
-export function SessionDetail({ session, selected, query, onToggle, onClose }: Props) {
+export function SessionDetail({ session, selection, query, onToggleSession, onToggleTalk, onClose }: Props) {
   const venue = venueById.get(session.venue);
+  const whole = selection?.whole ?? false;
+  const talkCount = selection?.talks.size ?? 0;
+  const canPickTalks = session.talks.length > 1;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -82,24 +87,58 @@ export function SessionDetail({ session, selected, query, onToggle, onClose }: P
             )}
           </dl>
           {session.talks.length > 0 && (
-            <ol className="talks">
-              {session.talks.map((t, i) => (
-                <li key={i} className={'talk' + (hit(t) ? ' is-hit' : '')}>
-                  {t.code && <span className="talk-code">{t.code}</span>}
-                  <span className="talk-title">{t.title}</span>
-                  <span className="talk-authors">{t.authors}</span>
-                </li>
-              ))}
-            </ol>
+            <>
+              {canPickTalks && (
+                <p className="talks-hint">
+                  講演ごとに追加することもできます（時刻はセッション時間を講演数で等分した目安）。
+                  {talkCount > 0 && !whole && ` ${talkCount}件を個別に選択中。`}
+                </p>
+              )}
+              <ol className="talks">
+                {session.talks.map((t, i) => {
+                  const picked = whole || (selection?.talks.has(talkKey(t, i)) ?? false);
+                  const tt = talkTime(session, i);
+                  return (
+                    <li key={i} className={'talk' + (hit(t) ? ' is-hit' : '') + (picked ? ' is-picked' : '')}>
+                      {canPickTalks ? (
+                        <button
+                          type="button"
+                          className={'talk-pick' + (picked ? ' is-on' : '')}
+                          aria-pressed={picked}
+                          aria-label={picked ? 'この講演をマイスケジュールから外す' : 'この講演をマイスケジュールに追加'}
+                          onClick={() => onToggleTalk(session, i)}
+                        >
+                          {picked ? '✓' : '＋'}
+                        </button>
+                      ) : (
+                        <span />
+                      )}
+                      <span className="talk-head">
+                        {t.code && <span className="talk-code">{t.code}</span>}
+                        {tt.split && (
+                          <span className="talk-time">
+                            {tt.start}–{tt.end}
+                          </span>
+                        )}
+                      </span>
+                      <span className="talk-title">{t.title}</span>
+                      <span className="talk-authors">{t.authors}</span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </>
           )}
         </div>
         <footer className="sheet-foot">
-          <button
-            type="button"
-            className={'btn btn-primary' + (selected ? ' is-remove' : '')}
-            onClick={() => onToggle(session.id)}
-          >
-            {selected ? '✓ マイスケジュールから削除' : '＋ マイスケジュールに追加'}
+          <button type="button" className={'btn btn-primary' + (whole ? ' is-remove' : '')} onClick={() => onToggleSession(session.id)}>
+            {whole
+              ? '✓ セッション全体をマイスケジュールから削除'
+              : talkCount > 0
+                ? `＋ セッション全体を追加（個別の${talkCount}件を含める）`
+                : canPickTalks
+                  ? '＋ セッション全体をマイスケジュールに追加'
+                  : '＋ マイスケジュールに追加'}
           </button>
         </footer>
       </aside>

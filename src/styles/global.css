@@ -1122,3 +1122,136 @@ button {
   opacity: 0.45;
   cursor: default;
 }
+
+/* ---- per-talk selection ---- */
+.talks-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+
+.talk {
+  grid-template-columns: 28px 1fr;
+  align-items: start;
+}
+
+.talk-pick {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 1px;
+}
+
+.talk-pick.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.talk.is-picked {
+  background: #eef3fb;
+  margin: 0 -8px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.talk-head {
+  grid-column: 2;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.talk-time {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.card-check.is-partial {
+  width: auto;
+  border-radius: 8px;
+  padding: 0 5px;
+  font-size: 10px;
+  background: var(--surface);
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  line-height: 13px;
+}
+
+.card.is-partial {
+  border-style: dashed;
+  border-left-style: solid;
+}
+
+.sched-est {
+  font-size: 9px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.sched-session {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.sched-item.is-talk .sched-title {
+  font-size: 13px;
+}
+
+/* ---- notices ---- */
+.notice {
+  font-size: 12px;
+  color: #5a4a00;
+  background: #fff8dc;
+  border: 1px solid #f0dc8c;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+.settings .about .hint a {
+  color: var(--accent);
+}
+
+@media print {
+  .print-foot {
+    margin-top: 6mm;
+    font-size: 8pt;
+    color: #444;
+    border-top: 1px solid #999;
+    padding-top: 2mm;
+  }
+}
+
+.import-banner {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #fff8dc;
+  border-bottom: 1px solid #f0dc8c;
+  font-size: 13px;
+}
+
+.import-banner .row {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 13px;
+  width: auto;
+}
