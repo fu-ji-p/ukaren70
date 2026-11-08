@@ -152,7 +152,7 @@ button {
 .tt-grid {
   position: relative;
   display: grid;
-  min-width: max-content;
+  width: max-content;
   /* horizontal lines every 15 min (27px), stronger every hour; vertical lines per column are drawn by the cells */
   background-image:
     repeating-linear-gradient(to bottom, var(--line-strong) 0 1px, transparent 1px 108px),
@@ -198,7 +198,7 @@ button {
 
 .tt-venue {
   position: sticky;
-  top: 0;
+  top: 18px; /* below the sticky building row */
   z-index: 2;
   margin-top: 18px;
   height: 30px;
@@ -216,27 +216,44 @@ button {
 .tt-venue-name {
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .tt-venue-room {
   font-size: 10px;
+  line-height: 1.2;
   color: var(--muted);
   text-overflow: ellipsis;
   overflow: hidden;
 }
 
-.tt-time {
+/* ---- timetable body ---- */
+.tt-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tt-timecol {
   position: sticky;
   left: 0;
   z-index: 2;
   background: var(--surface);
   border-right: 1px solid var(--line-strong);
+}
+
+.tt-time {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 2px 4px 0 0;
+  text-align: right;
   font-size: 11px;
   color: var(--muted);
-  padding: 0 4px;
-  text-align: right;
   line-height: 1;
-  padding-top: 3px;
+  border-right: 0;
+  background: none;
 }
 
 .tt-time.is-hour {
@@ -247,4 +264,155 @@ button {
 .tt-col {
   border-right: 1px solid var(--line);
   pointer-events: none;
+}
+
+.tt-now {
+  position: relative;
+  height: 0;
+  border-top: 2px solid var(--now);
+  z-index: 3;
+  pointer-events: none;
+  margin-top: -1px;
+}
+
+.tt-now-label {
+  position: sticky;
+  left: 0;
+  display: inline-block;
+  transform: translateY(-9px);
+  background: var(--now);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 4px;
+  border-radius: 0 3px 3px 0;
+}
+
+/* ---- session cards ---- */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  margin: 1px 2px 1px 1px;
+  padding: 3px 4px;
+  border: 1px solid var(--kb);
+  border-left-width: 4px;
+  border-radius: 4px;
+  background: var(--kc);
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 1;
+  min-width: 0;
+  transition: opacity 0.15s;
+}
+
+.card:active {
+  filter: brightness(0.95);
+}
+
+.card-time {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-all;
+}
+
+.card-chair {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.card-check {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.card.is-selected {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  border-left-color: var(--kb);
+}
+
+.card.is-dimmed,
+.chip.is-dimmed {
+  opacity: 0.25;
+}
+
+.card.is-matched {
+  box-shadow: 0 0 0 2px #ffcc00;
+}
+
+/* kind colours: --kc = fill, --kb = border */
+.kind-os { --kc: var(--kind-os); --kb: var(--kind-os-b); }
+.kind-general { --kc: var(--kind-general); --kb: var(--kind-general-b); }
+.kind-special { --kc: var(--kind-special); --kb: var(--kind-special-b); }
+.kind-social { --kc: var(--kind-social); --kb: var(--kind-social-b); }
+.kind-business { --kc: var(--kind-business); --kb: var(--kind-business-b); }
+.kind-lunch { --kc: var(--kind-lunch); --kb: var(--kind-lunch-b); }
+.kind-student { --kc: var(--kind-student); --kb: var(--kind-student-b); }
+.kind-event { --kc: var(--kind-event); --kb: var(--kind-event-b); }
+.kind-party { --kc: var(--kind-party); --kb: var(--kind-party-b); }
+.kind-exhibition { --kc: var(--kind-exhibition); --kb: var(--kind-exhibition-b); }
+
+/* ---- off-grid strip (exhibition, off-site party) ---- */
+.offgrid {
+  flex: none;
+  display: flex;
+  gap: 6px;
+  padding: 6px 8px;
+  overflow-x: auto;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.chip {
+  flex: none;
+  border: 1px solid var(--kb);
+  border-left-width: 4px;
+  border-radius: 999px;
+  background: var(--kc);
+  padding: 3px 10px 3px 8px;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chip-time {
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.chip.is-selected {
+  box-shadow: inset 0 0 0 1px var(--accent);
+  border-color: var(--accent);
+  border-left-color: var(--kb);
 }

@@ -1,58 +1,140 @@
+import { useEffect, useRef } from 'react';
+import { useElementWidth } from '../hooks/useElementWidth';
 import type { Session, Venue } from '../types';
 import {
+  GRID_END,
+  GRID_START,
   HEADER_PX,
   SUB_COUNT,
   SUB_PX,
   TIME_COL_PX,
   VENUE_COL_MIN_PX,
   groupByBuilding,
+  minutesToOffset,
   timeSlots,
 } from '../lib/layout';
 import { fromMinutes } from '../lib/time';
+import { SessionCard } from './SessionCard';
 
 interface Props {
   venues: Venue[];
   sessions: Session[];
+  selectedSet: Set<string>;
+  /** null = no search active */
+  matchSet: Set<string> | null;
+  /** minutes since midnight in JST when the displayed day is today, else null */
+  nowMinutes: number | null;
+  onOpen: (id: string) => void;
 }
 
-export function Timetable({ venues }: Props) {
+export function Timetable({ venues, sessions, selectedSet, matchSet, nowMinutes, onOpen }: Props) {
   const groups = groupByBuilding(venues);
   const slots = timeSlots();
+  const colIndex = new Map(venues.map((v, i) => [v.id, i + 2]));
+  const gridSessions = sessions.filter((s) => colIndex.has(s.venue));
+  const offGrid = sessions.filter((s) => !colIndex.has(s.venue));
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const width = useElementWidth(scrollRef);
+  // Columns are at least 90px (phones scroll horizontally); on wide screens they grow to fill the width.
+  const colPx = Math.max(VENUE_COL_MIN_PX, Math.floor((width - TIME_COL_PX) / venues.length));
   const style = {
-    gridTemplateColumns: `${TIME_COL_PX}px repeat(${venues.length}, minmax(${VENUE_COL_MIN_PX}px, 1fr))`,
-    gridTemplateRows: `${HEADER_PX}px repeat(${SUB_COUNT}, ${SUB_PX}px)`,
+    gridTemplateColumns: `${TIME_COL_PX}px repeat(${venues.length}, ${colPx}px)`,
+    gridTemplateRows: `${HEADER_PX}px ${SUB_COUNT * SUB_PX}px`,
   } as const;
+  const showNow = nowMinutes !== null && nowMinutes >= GRID_START && nowMinutes <= GRID_END;
+
+  // Scroll so the current time is visible when opening today's tab.
+  useEffect(() => {
+    if (!showNow || !scrollRef.current || nowMinutes === null) return;
+    const y = HEADER_PX + minutesToOffset(nowMinutes) - 120;
+    scrollRef.current.scrollTo({ top: Math.max(0, y) });
+    // only on mount / day change, not every minute
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showNow, venues]);
 
   return (
-    <div className="tt-scroll">
-      <div className="tt-grid" style={style}>
-        {/* corner */}
-        <div className="tt-corner" style={{ gridRow: 1, gridColumn: 1 }} />
-        {/* building row + venue row inside one header cell per venue */}
-        {groups.map((g) => {
-          const first = venues.indexOf(g.venues[0]) + 2;
-          return (
-            <div key={g.building} className="tt-building" style={{ gridRow: 1, gridColumn: `${first} / span ${g.venues.length}` }}>
-              <span>{g.building}</span>
+    <div className="tt-wrap">
+      {offGrid.length > 0 && (
+        <div className="offgrid">
+          {offGrid.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              className={
+                'chip kind-' +
+                s.kind +
+                (selectedSet.has(s.id) ? ' is-selected' : '') +
+                (matchSet && !matchSet.has(s.id) ? ' is-dimmed' : '')
+              }
+              onClick={() => onOpen(s.id)}
+            >
+              <span className="chip-time">
+                {s.start}–{s.end}
+              </span>
+              {s.title}
+              {selectedSet.has(s.id) && ' ✓'}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="tt-scroll" ref={scrollRef}>
+        <div className="tt-grid" style={style}>
+          <div className="tt-corner" style={{ gridRow: 1, gridColumn: 1 }} />
+          {groups.map((g, gi) => {
+            const first = venues.indexOf(g.venues[0]) + 2;
+            return (
+              <div
+                key={gi}
+                className="tt-building"
+                style={{ gridRow: 1, gridColumn: `${first} / span ${g.venues.length}` }}
+              >
+                <span>{g.building}</span>
+              </div>
+            );
+          })}
+          {venues.map((v, i) => (
+            <div key={v.id} className="tt-venue" style={{ gridRow: 1, gridColumn: i + 2 }} title={v.room}>
+              <span className="tt-venue-name">{v.name}</span>
+              <span className="tt-venue-room">{v.room}</span>
             </div>
-          );
-        })}
-        {venues.map((v, i) => (
-          <div key={v.id} className="tt-venue" style={{ gridRow: 1, gridColumn: i + 2 }} title={v.room}>
-            <span className="tt-venue-name">{v.name}</span>
-            <span className="tt-venue-room">{v.room}</span>
+          ))}
+          {/* time column: one label per 15-minute row, absolutely positioned inside the body row */}
+          <div className="tt-timecol" style={{ gridRow: 2, gridColumn: 1 }}>
+            {slots.map((t) => (
+              <div
+                key={t}
+                className={'tt-time' + (t % 60 === 0 ? ' is-hour' : '')}
+                style={{ top: minutesToOffset(t) }}
+              >
+                {t % 60 === 0 ? fromMinutes(t) : ''}
+              </div>
+            ))}
           </div>
-        ))}
-        {/* time column: one label per 15-minute row (spans 3 sub rows) */}
-        {slots.map((t, i) => (
-          <div
-            key={t}
-            className={'tt-time' + (t % 60 === 0 ? ' is-hour' : '')}
-            style={{ gridRow: `${i * 3 + 2} / span 3`, gridColumn: 1 }}
-          >
-            {t % 60 === 0 ? fromMinutes(t) : ''}
-          </div>
-        ))}
+          {/* column separators */}
+          {venues.map((v, i) => (
+            <div key={v.id} className="tt-col" style={{ gridRow: 2, gridColumn: i + 2 }} />
+          ))}
+          {gridSessions.map((s) => (
+            <SessionCard
+              key={s.id}
+              session={s}
+              column={colIndex.get(s.venue)!}
+              selected={selectedSet.has(s.id)}
+              dimmed={matchSet !== null && !matchSet.has(s.id)}
+              matched={matchSet !== null && matchSet.has(s.id)}
+              onOpen={onOpen}
+            />
+          ))}
+          {showNow && nowMinutes !== null && (
+            <div
+              className="tt-now"
+              style={{ gridRow: 2, gridColumn: `1 / span ${venues.length + 1}`, top: minutesToOffset(nowMinutes) }}
+              aria-label={`現在時刻 ${fromMinutes(nowMinutes)}`}
+            >
+              <span className="tt-now-label">{fromMinutes(nowMinutes)}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
