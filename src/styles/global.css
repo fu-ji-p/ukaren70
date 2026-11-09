@@ -282,6 +282,24 @@ button {
   line-height: 1.2;
 }
 
+/* floor shown after the venue name in the timetable header ("A会場 3F") */
+.tt-floor {
+  margin-left: 4px;
+  padding: 0 3px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--bld, var(--muted));
+  vertical-align: 1px;
+}
+
+/* floor shown after the room name in the detail sheet and My Schedule ("中ホール 3階") */
+.floor-tag {
+  margin-left: 4px;
+  font-weight: 700;
+}
+
 .tt-venue-room {
   font-size: 10px;
   line-height: 1.2;
@@ -1070,6 +1088,12 @@ button {
 
   .kind-mini {
     color: #444;
+  }
+
+  .tt-floor {
+    color: #000;
+    background: none;
+    border: 1px solid #000;
   }
 
   .bld-tag {

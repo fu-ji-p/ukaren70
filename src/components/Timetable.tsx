@@ -15,6 +15,7 @@ import {
   timeSlots,
 } from '../lib/layout';
 import { fromMinutes } from '../lib/time';
+import { venueFloor } from '../lib/venue';
 import { SessionCard } from './SessionCard';
 import type { SessionSelection } from '../lib/selection';
 
@@ -109,9 +110,12 @@ export function Timetable({ venues, sessions, selection, matchSet, nowMinutes, o
               key={v.id}
               className={'tt-venue' + venueClass(v)}
               style={{ gridRow: 1, gridColumn: i + 2 }}
-              title={`${v.room}（${v.building}）`}
+              title={`${v.room}${v.floor !== undefined ? ` ${v.floor}階` : ''}（${v.building}）`}
             >
-              <span className="tt-venue-name">{v.name}</span>
+              <span className="tt-venue-name">
+                {v.name}
+                {venueFloor(v) !== null && <span className="tt-floor">{venueFloor(v)}F</span>}
+              </span>
               <span className="tt-venue-room">{v.room}</span>
             </div>
           ))}

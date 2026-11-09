@@ -31,7 +31,7 @@
 ```jsonc
 {
   "conference": { "name": "...", "dates": ["2026-11-10", "..."], "site": "...", "generatedFrom": [...], "generatedAt": "YYYY-MM-DD" },
-  "venues": [ { "id": "A", "name": "A会場", "room": "中ホール", "building": "ライトキューブ宇都宮", "grid": true } ],
+  "venues": [ { "id": "A", "name": "A会場", "room": "中ホール", "building": "ライトキューブ宇都宮", "floor": 3, "grid": true } ],
   "sessions": [
     {
       "id": "10A0900",          // 日(2桁) + 会場ID + 開始時刻(HHMM)。一意
@@ -49,6 +49,13 @@
 }
 ```
 
+- `venues[].floor` は階（数値）。各施設の公式フロアガイドで確認した値（2026-11-10 時点）:
+  ライトキューブ宇都宮（https://light-cube.jp/floor/）は 1 階 = 大ホール・小会議室 101〜108・ホワイエ、
+  2 階 = 大会議室 201/202、3 階 = 中ホール・ホワイエ、4 階 = 小会議室 401〜403。
+  TKP ガーデンシティ宇都宮（アパホテル〈宇都宮駅前〉内、https://www.kashikaigishitsu.net/facilitys/gc-utsunomiya/）は
+  10 階 = ロイヤルホール、9 階 = シリウス・マーズ・ジュピター・マーキュリー。会場外（`OFF`）は省略。
+  タイムテーブルの会場ヘッダ（「A会場 3F」）、詳細・マイスケジュール（「中ホール 3階」）、建物移動の注記、
+  カレンダー書き出しの場所欄に表示する。部屋名に階が含まれる会場（1F/3F ホワイエ）は重ねて表示しない。
 - `venues[].grid` が `false` の会場（企業展示 `EXH`、会場外 `OFF`）はグリッドの列にならず、
   各日の上部に「終日・会場外」のチップとして表示する。
 - `kind` は `os` / `general` / `special` / `social` / `business` / `lunch` / `student` / `event` / `party` / `exhibition` の10種。

@@ -15,6 +15,8 @@ export interface Venue {
   name: string;
   room: string;
   building: string;
+  /** floor number from the building's official floor guide; absent for off-site venues */
+  floor?: number;
   /** true = shown as a column on the timetable grid */
   grid: boolean;
 }

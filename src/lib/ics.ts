@@ -1,6 +1,7 @@
 import type { PlanItem } from './selection';
 import type { Venue } from '../types';
 import { KIND_LABEL } from '../data';
+import { venueLocation } from './venue';
 
 /**
  * iCalendar (RFC 5545) export of the selected sessions/talks.
@@ -69,7 +70,7 @@ export interface IcsOptions {
 export function eventLines(item: PlanItem, venueById: Map<string, Venue>, opts: IcsOptions): string[] {
   const s = item.session;
   const v = venueById.get(s.venue);
-  const location = v ? `${v.name} ${v.room}（${v.building}）` : s.venue;
+  const location = v ? venueLocation(v) : s.venue;
   const summary = item.talk ? item.talk.title : s.title;
   const desc: string[] = [];
   if (item.talk) {

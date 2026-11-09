@@ -1,4 +1,5 @@
 import { buildingClass } from '../lib/layout';
+import { venueFloor } from '../lib/venue';
 import type { DayPlan } from '../lib/schedule';
 import { KIND_LABEL, venueById } from '../data';
 import { formatDateJa } from '../lib/time';
@@ -97,6 +98,7 @@ export function MySchedule({ plans, print = false, onOpen, onRemove, onPrint }: 
                       {move && (
                         <div className="move-note">
                           🚶 建物移動: {move.fromBuilding} → {move.toBuilding}
+                          {v?.floor !== undefined && ` ${v.floor}階`}
                           {move.gapMinutes >= 0 ? `（空き ${formatGap(move.gapMinutes)}）` : '（時間が重なっています）'}
                         </div>
                       )}
@@ -128,6 +130,7 @@ export function MySchedule({ plans, print = false, onOpen, onRemove, onPrint }: 
                           )}
                           <div className="sched-venue">
                             <strong>{v?.name ?? s.venue}</strong> {v?.room}
+                            {venueFloor(v) !== null && <span className="floor-tag">{venueFloor(v)}階</span>}
                             <span className={'bld-tag ' + buildingClass(v?.building)}>{v?.building}</span>
                           </div>
                           {!it.talk && s.chair && <div className="sched-chair">司会: {s.chair}</div>}

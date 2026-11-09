@@ -3,7 +3,7 @@ import { buildIcs, foldLine, icsEscape, jstToUtcStamp } from '../src/lib/ics';
 import { resolveItem } from '../src/lib/selection';
 import type { Session, Venue } from '../src/types';
 
-const venue: Venue = { id: 'A', name: 'A会場', room: '中ホール', building: 'ライトキューブ宇都宮', grid: true };
+const venue: Venue = { id: 'A', name: 'A会場', room: '中ホール', building: 'ライトキューブ宇都宮', floor: 3, grid: true };
 const session: Session = {
   id: '10A0900',
   date: '2026-11-10',
@@ -64,7 +64,7 @@ describe('buildIcs', () => {
     expect(unfolded).toContain('DTSTART:20261110T003000Z');
     expect(unfolded).toContain('SUMMARY:【OS】月面探査\\, 第1回\; 導入');
     expect(unfolded).toContain('SUMMARY:講演その2');
-    expect(unfolded).toContain('LOCATION:A会場 中ホール（ライトキューブ宇都宮）');
+    expect(unfolded).toContain('LOCATION:A会場 中ホール 3階（ライトキューブ宇都宮）');
     expect(unfolded).toContain('司会: 山田 太郎');
     expect(unfolded).toContain('1A01 講演その1 / 佐藤 花子 (JAXA)');
     expect(unfolded).toContain('目安');
